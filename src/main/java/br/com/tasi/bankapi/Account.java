@@ -9,24 +9,24 @@ import java.util.Objects;
 public class Account {
 
     /** Stores the Account ID. */
-    private final int accountId;
+    private final String id;
     /** Stores the Account Balance. */
     private int balance = 0;
 
     /**
      * Account class controller.
-     * @param accountId Account ID.
+     * @param id Account ID.
      */
-    public Account(int accountId) {
-        this.accountId = accountId;
+    public Account(String id) {
+        this.id = id;
     }
 
     /**
      * Returns the Account ID.
      * @return the Account ID.
      */
-    public int getAccountId() {
-        return accountId;
+    public String getId() {
+        return id;
     }
 
     /**
@@ -58,7 +58,7 @@ public class Account {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.accountId);
+        return Objects.hashCode(this.id);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class Account {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("{\"id\":\"").append(String.valueOf(this.accountId)).append("\", ");
+        sb.append("{\"id\":\"").append(String.valueOf(this.id)).append("\", ");
         sb.append("\"balance\":").append(this.balance).append("}");
         return sb.toString();
     }

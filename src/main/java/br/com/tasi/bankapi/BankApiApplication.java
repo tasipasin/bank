@@ -34,14 +34,14 @@ public class BankApiApplication {
      * Removes all accounts.
      */
     @PostMapping("/reset")
-    public ResponseEntity<Integer> reset() {
+    public ResponseEntity<Object> reset() {
         log.info("Accounts reseted");
         this.activeAccounts.clear();
-        return ResponseEntity.status(HttpStatus.OK).body(0);
+        return ResponseEntity.status(HttpStatus.OK).body("OK");
     }
 
     @GetMapping("/balance")
-    public ResponseEntity<Integer> balance(@RequestParam(name = "account_id") int accountId) {
+    public ResponseEntity<Object> balance(@RequestParam(name = "account_id") String accountId) {
         log.info("Received account_id [{}]", accountId);
         // Gets the account by it's ID
         Account account = this.getAccountById(accountId);
@@ -71,7 +71,7 @@ public class BankApiApplication {
      * @return An Account object if there is an account with the
      *         requested ID. Returns <code>null</code> otherwise.
      */
-    private Account getAccountById(Integer accountId) {
+    private Account getAccountById(String accountId) {
         return getAccountById(accountId, false);
     }
 
@@ -82,10 +82,10 @@ public class BankApiApplication {
      * @return An Account object if there is an account with the
      *         requested ID. Returns <code>null</code> otherwise.
      */
-    private Account getAccountById(Integer accountId, boolean createOfNotExists) {
+    private Account getAccountById(String accountId, boolean createOfNotExists) {
         // Searches for the corresponding Account
         Account account = this.activeAccounts.stream()
-                .filter(accountIt -> Objects.equals(accountIt.getAccountId(), accountId))
+                .filter(accountIt -> Objects.equals(accountIt.getId(), accountId))
                 .findFirst()
                 .orElse(null);
         // Create the account if doesn't exists
@@ -105,8 +105,8 @@ public class BankApiApplication {
         // Gets all the values. If one are not present, assume -1
         String type = (String) body.get("type");
         int amount = (Integer) body.get("amount");
-        int origin = Integer.parseInt((String) body.getOrDefault("origin", "-1"));
-        int destination = Integer.parseInt((String) body.getOrDefault("destination", "-1"));
+        String origin = (String) body.get("origin");
+        String destination = (String) body.get("destination");
         // Select the event type to execute
         switch (type) {
             case "deposit":
@@ -122,17 +122,17 @@ public class BankApiApplication {
 
     /**
      * Make Deposit Event.
-     * @param destination Account to be deposited.
+     * @param destination Account to be deposited to.
      * @param amount Amount to be deposited.
      * @return The result of the event.
      */
-    private Map<String, Object> doDeposit(int destination, int amount) {
+    private Map<String, Object> doDeposit(String destination, int amount) {
         log.info("Making deposit to {} of {}", destination, amount);
         Map<String, Object> result = new HashMap<>();
         Account account = this.getAccountById(destination, true);
         // Checks account
         account.deposit(amount);
-        result.put("destination", account.toString());
+        result.put("destination", account);
         log.info("Updated Account Object: [{}]", account);
         return result;
     }
@@ -143,14 +143,14 @@ public class BankApiApplication {
      * @param amount Amount to be withdrawn.
      * @return The result of the event.
      */
-    private Map<String, Object> doWithdraw(int origin, int amount) {
+    private Map<String, Object> doWithdraw(String origin, int amount) {
         log.info("Withdrawing to {} of {}", origin, amount);
         Map<String, Object> result = new HashMap<>();
         Account account = this.getAccountById(origin);
         // Checks account
         if (null != account) {
             account.withdraw(amount);
-            result.put("origin", account.toString());
+            result.put("origin", account);
             log.info("Updated Account Object: [{}]", account);
         }
         return result;
@@ -163,7 +163,7 @@ public class BankApiApplication {
      * @param amount Amount to be transferred.
      * @return The result of the events.
      */
-    private Map<String, Object> doTransfer(int origin, int destination, int amount) {
+    private Map<String, Object> doTransfer(String origin, String destination, int amount) {
         Map<String, Object> result = new HashMap<>();
         result.putAll(doWithdraw(origin, amount));
         // If result is empty is because the account to withdraw doesn't exists
