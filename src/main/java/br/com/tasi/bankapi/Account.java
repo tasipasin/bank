@@ -65,4 +65,13 @@ public class Account {
     public boolean equals(Object obj) {
         return obj instanceof Account && Objects.equals(obj.hashCode(), this.hashCode());
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\"id\":\"").append(String.valueOf(this.accountId)).append("\", ");
+        sb.append("\"balance\":").append(this.balance).append("}");
+        return sb.toString();
+    }
+
 }
